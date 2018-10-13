@@ -1,6 +1,6 @@
 // ---------------------------------------------------------------------
 //
-// XPlaneCDU
+// XPlane748EFB
 //
 // Copyright (C) 2018 Wayne Piekarski
 // wayne@tinmith.net http://tinmith.net/wayne
@@ -20,15 +20,13 @@
 //
 // ---------------------------------------------------------------------
 
-XPlaneCDU is a remote control interface for the Control Display Unit (CDU) present in X-Plane 11. This app does not provide an FMS, but simply a way to control the existing CDU from an Android tablet or phone. Currently it works with the Zibo Boeing 738 or SSG 748 aircraft.
+XPlane748EFB is a remote control interface for the Electronic Flight Bag (EFB) present in SSG's 747-8 aircraft.
 
 You can download the app directly to your Android device from the Google Play store: 
-https://play.google.com/store/apps/details?id=net.waynepiekarski.xplanecdu
+https://play.google.com/store/apps/details?id=net.waynepiekarski.xplane748efb
 
 This application is open source, released under the GNU Public License version 3 (GPLv3). It is written in Kotlin and shows how to implement the complex screen layout on any device size.
 
 You must have the ExtPanel v2 plugin installed in your X-Plane 11 Resources/plugins directory. This plugin uses port 51000 to provide external control capabilities. You can download the binaries for the plugin from http://waynepiekarski.net/extplane and the corresponding source code from https://github.com/waynepiekarski/XPlaneCDU ... it is a build of the original code at https://github.com/vranki/ExtPlane (licensed under GPLv3).
-
-It should be possible to extend XPlaneCDU to work with other aircraft, but it must provide datarefs for the CDU text strings. The default X-Plane 737 does not support this, and every other payware aircraft uses non-standard datarefs. It should be possible to support the Flight Factor 757/767, but they already provide a web-based CDU.
 
 This is an early prototype and I look forward to feedback on any problems. File bugs or comments here on GitHub.

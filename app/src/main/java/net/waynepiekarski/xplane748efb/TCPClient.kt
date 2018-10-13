@@ -1,6 +1,6 @@
 // ---------------------------------------------------------------------
 //
-// XPlaneCDU
+// XPlane748EFB
 //
 // Copyright (C) 2018 Wayne Piekarski
 // wayne@tinmith.net http://tinmith.net/wayne
@@ -20,7 +20,7 @@
 //
 // ---------------------------------------------------------------------
 
-package net.waynepiekarski.xplanecdu
+package net.waynepiekarski.xplane748efb
 
 import android.util.Log
 
