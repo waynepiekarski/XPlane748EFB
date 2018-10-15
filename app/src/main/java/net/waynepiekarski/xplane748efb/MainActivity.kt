@@ -39,21 +39,28 @@ import android.content.Context
 import android.os.*
 import android.text.InputType
 import android.view.SoundEffectConstants
+import java.io.BufferedReader
+import java.io.ByteArrayInputStream
+import java.io.IOException
+import java.io.InputStreamReader
+import java.lang.Exception
 import java.net.UnknownHostException
 
 
 
 
-class MainActivity : Activity(), TCPClient.OnTCPEvent, MulticastReceiver.OnReceiveMulticast {
+class MainActivity : Activity(), TCPClient.OnTCPEvent, TCPBitmapClient.OnTCPBitmapEvent, MulticastReceiver.OnReceiveMulticast {
 
     private var becn_listener: MulticastReceiver? = null
     private var tcp_extplane: TCPClient? = null
+    private var tcp_texture: TCPBitmapClient? = null
     private var connectAddress: String? = null
     private var manualAddress: String = ""
     private var manualInetAddress: InetAddress? = null
     private var connectSupported = false
     private var connectActiveDescrip: String = ""
     private var connectWorking = false
+    private var connectTexturing = false
     private var connectShutdown = false
     private var connectFailures = 0
     private lateinit var overlayCanvas: Canvas
@@ -63,6 +70,8 @@ class MainActivity : Activity(), TCPClient.OnTCPEvent, MulticastReceiver.OnRecei
     private var lastLayoutTop    = -1
     private var lastLayoutRight  = -1
     private var lastLayoutBottom = -1
+    private var window1Idx = -1
+    private var windowNames: ArrayList<String> = ArrayList(0)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.d(Const.TAG, "onCreate()")
@@ -74,6 +83,8 @@ class MainActivity : Activity(), TCPClient.OnTCPEvent, MulticastReceiver.OnRecei
         lastLayoutTop = -1
         lastLayoutRight = -1
         lastLayoutBottom = -1
+        window1Idx = -1
+        windowNames.clear()
 
         // Reset the Definitions
         Definitions.reset()
@@ -189,13 +200,19 @@ class MainActivity : Activity(), TCPClient.OnTCPEvent, MulticastReceiver.OnRecei
         val pixelWidth   = pixelXRight - pixelXLeft
         val pixelHeight  = pixelYBottom - pixelYTop
 
-        // Set the top and left padding in pixels according to where the texture display starts
+        // Set the padding in pixels according to where the texture display will be fit in to
         val lp1 = leftPaddingDisplay.getLayoutParams()
         lp1.width = pixelXLeft
         leftPaddingDisplay.setLayoutParams(lp1)
         val lp2 = topPaddingDisplay.getLayoutParams()
         lp2.height = pixelYTop
         topPaddingDisplay.setLayoutParams(lp2)
+
+        // Resize the texture display
+        val lpT = textureImage1.getLayoutParams()
+        lpT.width = pixelWidth
+        lpT.height = pixelHeight
+        textureImage1.setLayoutParams(lpT)
 
         // Adjust the about box to the correct width to fit only over the texture display
         val lp3 = aboutText.getLayoutParams()
@@ -426,13 +443,19 @@ class MainActivity : Activity(), TCPClient.OnTCPEvent, MulticastReceiver.OnRecei
         Log.d(Const.TAG, "restartNetworking()")
         setConnectionStatus("Closing down network", "", "Wait a few seconds")
         connectAddress = null
+        connectTexturing = false
         connectWorking = false
         connectSupported = false
         connectActiveDescrip = ""
         if (tcp_extplane != null) {
-            Log.d(Const.TAG, "Cleaning up any TCP connections")
+            Log.d(Const.TAG, "Cleaning up any EXTPLANE TCP connections")
             tcp_extplane!!.stopListener()
             tcp_extplane = null
+        }
+        if (tcp_texture != null) {
+            Log.d(Const.TAG, "Cleaning up any TEXTURE TCP connections")
+            tcp_texture!!.stopListener()
+            tcp_texture = null
         }
         if (becn_listener != null) {
             Log.w(Const.TAG, "Cleaning up the BECN listener, somehow it is still around?")
@@ -455,6 +478,7 @@ class MainActivity : Activity(), TCPClient.OnTCPEvent, MulticastReceiver.OnRecei
             }
         }
         Definitions.reset()
+        textureImage1.setImageBitmap(Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888))
     }
 
     override fun onPause() {
@@ -462,9 +486,14 @@ class MainActivity : Activity(), TCPClient.OnTCPEvent, MulticastReceiver.OnRecei
         super.onPause()
         connectShutdown = true // Prevent new BECN listeners starting up in restartNetworking
         if (tcp_extplane != null) {
-            Log.d(Const.TAG, "onPause(): Cancelling existing TCP connection")
+            Log.d(Const.TAG, "onPause(): Cancelling existing EXTPLANE TCP connection")
             tcp_extplane!!.stopListener()
             tcp_extplane = null
+        }
+        if (tcp_texture != null) {
+            Log.d(Const.TAG, "onPause(): Cancelling existing TEXTURE TCP connection")
+            tcp_texture!!.stopListener()
+            tcp_texture = null
         }
         if (becn_listener != null) {
             Log.d(Const.TAG, "onPause(): Cancelling existing BECN listener")
@@ -506,7 +535,7 @@ class MainActivity : Activity(), TCPClient.OnTCPEvent, MulticastReceiver.OnRecei
         becn_listener = null
 
         check(tcp_extplane == null)
-        Log.d(Const.TAG, "Making connection to $connectAddress:${Const.TCP_EXTPLANE_PORT}")
+        Log.d(Const.TAG, "Making EXTPLANE connection to $connectAddress:${Const.TCP_EXTPLANE_PORT}")
         tcp_extplane = TCPClient(source, Const.TCP_EXTPLANE_PORT, this)
     }
 
@@ -523,6 +552,43 @@ class MainActivity : Activity(), TCPClient.OnTCPEvent, MulticastReceiver.OnRecei
         Log.d(Const.TAG, "onDisconnectTCP(): Closing down TCP connection and will restart")
         connectFailures++
         restartNetworking()
+    }
+
+    override fun onConnectTCP(tcpRef: TCPBitmapClient) {
+        if (tcpRef != tcp_texture)
+            return
+        setConnectionStatus("Established TCP", "Waiting for XTE", "Needs XTE plugin", "$connectAddress:${Const.TCP_TEXTURE_PORT}")
+    }
+
+    override fun onDisconnectTCP(reason: String?, tcpRef: TCPBitmapClient) {
+        if (tcpRef != tcp_texture)
+            return
+        Log.d(Const.TAG, "onDisconnectTCP(): Closing down TCP connection and will restart")
+        if (reason != null) {
+            Log.d(Const.TAG, "Network failed due to reason [$reason]")
+            Toast.makeText(this, "Network failed - $reason", Toast.LENGTH_LONG).show()
+        }
+        connectFailures++
+        restartNetworking()
+    }
+
+    override fun onReceiveTCPBitmap(windowId: Int, image: Bitmap, tcpRef: TCPBitmapClient) {
+        // If the current connection does not match the incoming reference, it is out of date and should be ignored.
+        // This is important otherwise we will try to transmit on the wrong socket, fail, and then try to restart.
+        if (tcpRef != tcp_texture)
+            return
+
+        if (!connectTexturing) {
+            // Everything is working with actual data coming back. This is the final step with ExtPlane and XTE both working!
+            connectFailures = 0
+            setConnectionStatus("X-Plane 748 EFB", connectActiveDescrip, "", "$connectAddress:${Const.TCP_EXTPLANE_PORT}+${Const.TCP_TEXTURE_PORT}")
+            connectTexturing = true
+        }
+
+        // Store the image into the layout, which will resize it to fit the screen
+        // Log.d(Const.TAG, "TCP returned window $windowId bitmap $image with ${image.width}x${image.height}, win1=$window1Idx")
+        if (window1Idx == windowId)
+            textureImage1.setImageBitmap(image)
     }
 
     override fun onReceiveTCP(line: String, tcpRef: TCPClient) {
@@ -630,12 +696,75 @@ class MainActivity : Activity(), TCPClient.OnTCPEvent, MulticastReceiver.OnRecei
                     }
                 }
                 if (unfinished == 0) {
-                    setConnectionStatus("X-Plane EFB working", "${connectActiveDescrip}", "", "$connectAddress:${Const.TCP_EXTPLANE_PORT}", redraw = false)
+                    setConnectionStatus("X-Plane EFB ExtPlane", "${connectActiveDescrip}", "Starting XTE", "$connectAddress:${Const.TCP_EXTPLANE_PORT}", redraw = false)
                     connectSupported = true
+
+                    // Now make the XTextureExtractor connection since the ExtPlane set up is done
+                    tcp_texture = TCPBitmapClient(manualInetAddress!!, Const.TCP_TEXTURE_PORT, this)
                 } else {
                     // Log.d(Const.TAG, "Waiting for $unfinished unfinished datarefs")
                 }
             }
         }
     }
+
+    private fun networkingFatal(reason: String) {
+        Log.d(Const.TAG, "Network fatal error due to reason [$reason]")
+        Toast.makeText(this, "Network error - $reason", Toast.LENGTH_LONG).show()
+        restartNetworking()
+    }
+
+    override fun onReceiveTCPHeader(header: ByteArray, tcpRef: TCPBitmapClient) {
+        var headerStr = String(header)
+        headerStr = headerStr.substring(0, headerStr.indexOf(0x00.toChar()))
+        Log.d(Const.TAG, "Received raw header [$headerStr] before PNG stream")
+        try {
+            val bufferedReader = BufferedReader(InputStreamReader(ByteArrayInputStream(header)))
+            val version = bufferedReader.readLine().split(' ')[0]
+            val aircraft = bufferedReader.readLine()
+            val texture = bufferedReader.readLine().split(' ')
+            val textureWidth = texture[0].toInt()
+            val textureHeight = texture[1].toInt()
+            Log.d(Const.TAG, "Plugin version [$version], aircraft [$aircraft], texture ${textureWidth}x${textureHeight}")
+            var line: String?
+            windowNames.clear()
+            while (true) {
+                line = bufferedReader.readLine()
+                if (line == null || line.contains("__EOF__"))
+                    break
+                val window = line.split(' ')
+                val name = window[0]
+                windowNames.add(name)
+                val l = window[1].toInt()
+                val t = window[2].toInt()
+                val r = window[3].toInt()
+                val b = window[4].toInt()
+                Log.d(Const.TAG, "Window [$name] = ($l,$t)->($r,$b)")
+                if (name.contains("CFG") || name.contains("EFB")) {
+                    window1Idx = windowNames.size-1
+                    Log.d(Const.TAG, "Found suitable EFB texture window at index $window1Idx")
+                }
+            }
+            // connectAircraft = "$aircraft ${textureWidth}x${textureHeight}"
+            if (version != Const.TCP_PLUGIN_VERSION) {
+                networkingFatal("Version [$version] is not expected [${Const.TCP_PLUGIN_VERSION}]")
+                return
+            }
+            if (windowNames.size <= 0) {
+                networkingFatal("No valid windows were sent")
+                return
+            }
+        } catch (e: IOException) {
+            Log.e(Const.TAG, "IOException processing header - $e")
+            networkingFatal("Invalid header data")
+            return
+        } catch (e: Exception) {
+            Log.e(Const.TAG, "Unknown exception processing header - $e")
+            networkingFatal("Invalid header read")
+            return
+        }
+    }
+
+    override fun getWindow1Index(): Int { return window1Idx }
+    override fun getWindow2Index(): Int { return window1Idx } // Use same as window 1
 }

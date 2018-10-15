@@ -94,7 +94,7 @@ object Definitions {
             "internal_help_7" to Button(  0, 510,  25, 537),
             "internal_help_8" to Button(405, 510, 432, 537),
 
-            "internal_display" to Button(47,  65, 382, 482)
+            "internal_display" to Button(50,  65, 382, 482)
     )
 
     class Dataref {

@@ -25,6 +25,9 @@ package net.waynepiekarski.xplane748efb
 object Const {
     val TAG = "XPlane748EFB"
     val TCP_EXTPLANE_PORT = 51000
+    val TCP_TEXTURE_PORT = 52500
+    val TCP_INTRO_HEADER = 4096
+    val TCP_PLUGIN_VERSION = "XTEv3"
     val BECN_PORT = 49707
     val BECN_ADDRESS = "239.255.1.1"
     val ERROR_NETWORK_SLEEP: Long = 1000 // Number of msec to wait on network failure

@@ -55,15 +55,13 @@
         android:background="@color/cdu_debug_padding_color"
         android:text="" />
 
-    <TextView
-        android:id="@+id/terminalUnused"
-        android:layout_width="wrap_content"
-        android:layout_height="@dimen/cdu_spacer_height"
+    <ImageView
+        android:id="@+id/textureImage1"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_below="@+id/topPaddingDisplay"
-        android:background="@color/cdu_debug_padding_color"
-        android:text="DEBUG TEXT, NEEDS REMOVAL"
-        android:textColor="@color/about_text_color"
-        android:textSize="10sp" />
+        android:layout_toRightOf="@+id/leftPaddingDisplay"
+        android:scaleType="fitXY" />
 
     <!-- About text that can pop up above the rest of the UI -->
     <TextView
