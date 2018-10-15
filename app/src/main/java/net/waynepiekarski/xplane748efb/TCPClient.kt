@@ -53,19 +53,23 @@ class TCPClient (private var address: InetAddress, private var port: Int, privat
         // The socketThread loop will now clean up everything
     }
 
-    fun writeln(str: String) {
+    fun write(str: String) {
         if (cancelled) {
             Log.d(Const.TAG, "Skipping write to cancelled socket: [$str]")
             return
         }
         Log.d(Const.TAG, "Writing to TCP socket: [$str]")
         try {
-            bufferedWriter.write(str + "\n")
+            bufferedWriter.write(str)
             bufferedWriter.flush()
         } catch (e: IOException) {
             Log.d(Const.TAG, "Failed to write [$str] to TCP socket with exception $e")
             stopListener()
         }
+    }
+
+    fun writeln(str: String) {
+        write(str + "\n")
     }
 
     private fun closeBuffers() {

@@ -23,7 +23,7 @@
 package net.waynepiekarski.xplane748efb
 
 object Const {
-    val TAG = "XPlaneCDU"
+    val TAG = "XPlane748EFB"
     val TCP_EXTPLANE_PORT = 51000
     val BECN_PORT = 49707
     val BECN_ADDRESS = "239.255.1.1"
