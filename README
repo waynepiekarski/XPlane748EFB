@@ -27,6 +27,8 @@ https://play.google.com/store/apps/details?id=net.waynepiekarski.xplane748efb
 
 This application is open source, released under the GNU Public License version 3 (GPLv3). It is written in Kotlin and shows how to implement the complex screen layout on any device size.
 
-You must have the ExtPanel v2 plugin installed in your X-Plane 11 Resources/plugins directory. This plugin uses port 51000 to provide external control capabilities. You can download the binaries for the plugin from http://waynepiekarski.net/extplane and the corresponding source code from https://github.com/waynepiekarski/XPlaneCDU ... it is a build of the original code at https://github.com/vranki/ExtPlane (licensed under GPLv3).
+You must have the ExtPlane v2 plugin installed in your X-Plane 11 Resources/plugins directory. This plugin uses port 51000 to provide external control capabilities. You can download the binaries for the plugin from http://waynepiekarski.net/extplane and the corresponding source code from https://github.com/waynepiekarski/XPlaneCDU ... it is a build of the original code at https://github.com/vranki/ExtPlane (licensed under GPLv3).
+
+You must have the XTextureExtractor plugin installed as well. Download the XTextureExtractor plugin from http://waynepiekarski.net/XTextureExtractor and unzip into the Resources/Plugins directory. It is recommended that you get this working first before using XPlane748EFB. The XTextureExtractor Android app is available from: https://play.google.com/store/apps/details?id=net.waynepiekarski.xtextureextractor
 
 This is an early prototype and I look forward to feedback on any problems. File bugs or comments here on GitHub.

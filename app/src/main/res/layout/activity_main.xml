@@ -79,13 +79,15 @@
 \n\nRequirements:
 \n- X-Plane 11
 \n- Download ExtPlane v2 plugin from http://waynepiekarski.net/ExtPlane and unzip into the Resources/Plugins directory
+\n- Download XTextureExtractor plugin from http://waynepiekarski.net/XTextureExtractor and unzip into the Resources/Plugins directory
 \n- SSG's Boeing 748
 \n- Open TCP port 51000 in Windows firewall for ExtPlane
+\n- Open TCP port 52500 in Windows firewall for XTextureExtractor
 \n- Multicast support on your network for auto-detection
 \n
 \nNote that you cannot use the original ExtPlane v1 binaries because they have bugs related to string datarefs.
 \n
-\nIf multi-cast is not working, you can tap on the connection text or the EFB screen to configure a manual X-Plane hostname or IP address.
+\nIf multi-cast is not working, you can tap on the connection text at the top to configure a manual X-Plane hostname or IP address.
 \n
 \nXPlane748EFB is licensed under the GNU Public License v3
 \nSource code available from https://github.com/waynepiekarski/XPlane748EFB
