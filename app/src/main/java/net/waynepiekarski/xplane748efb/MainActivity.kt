@@ -700,7 +700,7 @@ class MainActivity : Activity(), TCPClient.OnTCPEvent, TCPBitmapClient.OnTCPBitm
                     connectSupported = true
 
                     // Now make the XTextureExtractor connection since the ExtPlane set up is done
-                    tcp_texture = TCPBitmapClient(manualInetAddress!!, Const.TCP_TEXTURE_PORT, this)
+                    tcp_texture = TCPBitmapClient(tcpRef.address, Const.TCP_TEXTURE_PORT, this)
                 } else {
                     // Log.d(Const.TAG, "Waiting for $unfinished unfinished datarefs")
                 }

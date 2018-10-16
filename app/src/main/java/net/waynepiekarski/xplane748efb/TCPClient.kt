@@ -29,7 +29,7 @@ import kotlin.concurrent.thread
 import java.io.*
 
 
-class TCPClient (private var address: InetAddress, private var port: Int, private var callback: OnTCPEvent) {
+class TCPClient (var address: InetAddress, var port: Int, private var callback: OnTCPEvent) {
     private lateinit var socket: Socket
     @Volatile private var cancelled = false
     private lateinit var bufferedWriter: BufferedWriter
